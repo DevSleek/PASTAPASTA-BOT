@@ -137,6 +137,8 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 # -----> CELERY
 REDIS_URL = os.getenv('REDIS_URL', 'redis://redis:6379')
@@ -158,6 +160,8 @@ if TELEGRAM_TOKEN is None:
         "Example of .env file: https://github.com/ohld/django-telegram-bot/blob/main/.env_example"
     )
     sys.exit(1)
+
+TELEGRAM_ID = os.getenv("TELEGRAM_ID")
 
 TELEGRAM_LOGS_CHAT_ID = os.getenv("TELEGRAM_LOGS_CHAT_ID", default=None)
 

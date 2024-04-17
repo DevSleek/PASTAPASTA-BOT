@@ -97,7 +97,7 @@ If you want just to run all the things locally, you can use Docker-compose which
 ### Create .env file. 
 You can switch to PostgreSQL just by uncommenting it's `DATABASE_URL` and commenting SQLite variable.
 ```bash
-cp .env_example .env
+cp .env .env
 ```
 
 ### Docker-compose

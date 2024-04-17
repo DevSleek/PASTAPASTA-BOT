@@ -1,13 +1,50 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+MAIN_MENU_KEYBOARD = [["🏠 Bosh menu"]]
 
-from tgbot.handlers.onboarding.manage_data import SECRET_LEVEL_BUTTON
-from tgbot.handlers.onboarding.static_text import github_button_text, secret_level_button_text
+MENU = "🍴 Menyu"
+BASKET = "📥 Savat"
+CAFE_LOCATION = "KAFE LOKATSIYASI"
+ABOUT_ORDER = "🚀 Buyurtma haqida"
+FEEDBACK = "✍️ Fikr bildirish"
+CONTACS = "☎️ Kontaktlar"
+SETTINGS = "⚙️ Sozlamalar"
 
+MAIN_KEYBOARD = [
+    [MENU, BASKET],
+    [CAFE_LOCATION, ABOUT_ORDER],
+    [FEEDBACK, CONTACS],
+    [SETTINGS],
+]
 
-def make_keyboard_for_start_command() -> InlineKeyboardMarkup:
-    buttons = [[
-        InlineKeyboardButton(github_button_text, url="https://github.com/ohld/django-telegram-bot"),
-        InlineKeyboardButton(secret_level_button_text, callback_data=f'{SECRET_LEVEL_BUTTON}')
-    ]]
+MARKS = [
+    ["😊Hammasi yoqdi ❤️"],
+    [ "☺️Yaxshi ⭐️⭐️⭐️⭐️"],
+    [ "😐 Yoqmadi ⭐️⭐️⭐️"],
+    ["☹️ Yomon ⭐️⭐️"],
+    ["😤 Juda yomon👎🏻"],
+]
 
-    return InlineKeyboardMarkup(buttons)
+SETTINGS_KEYBOARD = [
+    ["🌐 Tilni tanlash"],
+    ["📱 Raqamni o'zgartirish"],
+]
+
+PASTA = "Pasta"
+SALATLAR = "Salatlar"
+SOVUQ = "Sovuq ichimliklar"
+SET = "2 KISHILIK SET"
+KOMBO = "🔥 Kombo 4 kishilik"
+QOSHIMCHALAR = "Qo'shimchalar"
+TAOMLAR = "Taomlar"
+TOMATO_SETI = "Tomato seti"
+RAVIOLI = "Ravioli ikki kishilik"
+KIDS_MENU = "😍 KIDS MENU"
+
+MENUS_KEYBOARD = [
+    [BASKET],
+    [PASTA, QOSHIMCHALAR],
+    [SALATLAR, TAOMLAR],
+    [SOVUQ, TOMATO_SETI],
+    [SET, RAVIOLI],
+    [KOMBO, KIDS_MENU],
+    [MAIN_MENU_KEYBOARD]
+]
