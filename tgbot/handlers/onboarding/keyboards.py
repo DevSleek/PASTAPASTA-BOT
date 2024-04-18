@@ -17,8 +17,8 @@ MAIN_KEYBOARD = [
 
 MARKS = [
     ["😊Hammasi yoqdi ❤️"],
-    [ "☺️Yaxshi ⭐️⭐️⭐️⭐️"],
-    [ "😐 Yoqmadi ⭐️⭐️⭐️"],
+    ["☺️Yaxshi ⭐️⭐️⭐️⭐️"],
+    ["😐 Yoqmadi ⭐️⭐️⭐️"],
     ["☹️ Yomon ⭐️⭐️"],
     ["😤 Juda yomon👎🏻"],
 ]
@@ -28,23 +28,3 @@ SETTINGS_KEYBOARD = [
     ["📱 Raqamni o'zgartirish"],
 ]
 
-PASTA = "Pasta"
-SALATLAR = "Salatlar"
-SOVUQ = "Sovuq ichimliklar"
-SET = "2 KISHILIK SET"
-KOMBO = "🔥 Kombo 4 kishilik"
-QOSHIMCHALAR = "Qo'shimchalar"
-TAOMLAR = "Taomlar"
-TOMATO_SETI = "Tomato seti"
-RAVIOLI = "Ravioli ikki kishilik"
-KIDS_MENU = "😍 KIDS MENU"
-
-MENUS_KEYBOARD = [
-    [BASKET],
-    [PASTA, QOSHIMCHALAR],
-    [SALATLAR, TAOMLAR],
-    [SOVUQ, TOMATO_SETI],
-    [SET, RAVIOLI],
-    [KOMBO, KIDS_MENU],
-    [MAIN_MENU_KEYBOARD]
-]

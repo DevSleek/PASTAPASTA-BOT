@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
 
     # local apps
-    'users.apps.UsersConfig',
+    'users',
+    'products'
 ]
 
 MIDDLEWARE = [

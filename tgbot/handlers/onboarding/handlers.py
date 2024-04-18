@@ -3,7 +3,7 @@ import datetime
 from django.utils import timezone
 from telegram import ParseMode, Update
 from telegram.ext import CallbackContext
-from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
+from telegram import KeyboardButton, ReplyKeyboardMarkup,  InlineKeyboardMarkup, Update, InlineKeyboardButton
 from telegram.ext import (
     ConversationHandler,
     CallbackContext,
@@ -12,8 +12,9 @@ from telegram.ext import (
 from users.models import User
 from tgbot.handlers.onboarding import static_text
 from tgbot.handlers.utils.info import extract_user_data_from_update
-from tgbot.handlers.onboarding.keyboards import MAIN_MENU_KEYBOARD, MAIN_KEYBOARD, MARKS, SETTINGS_KEYBOARD, MENUS_KEYBOARD
-from tgbot.handlers.onboarding.states import FEEDBACK_STATE, MENUS_STATE, LOCATION_STATE
+from tgbot.handlers.onboarding.keyboards import MAIN_MENU_KEYBOARD, MAIN_KEYBOARD, MARKS, SETTINGS_KEYBOARD, BASKET
+from tgbot.handlers.onboarding.states import FEEDBACK_STATE, MENUS_STATE, LOCATION_STATE, SETTINGS_STATE, SUB_MENUS_STATE
+from products.models import Menu, Product
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -31,8 +32,6 @@ def start(update: Update, context: CallbackContext) -> None:
             resize_keyboard=True,
         ),
     )
-
-    return ConversationHandler.END
 
 
 def help(update: Update, context: CallbackContext):
@@ -55,6 +54,21 @@ def settings(update: Update, context: CallbackContext):
             one_time_keyboard=False,
             resize_keyboard=True,
         )
+    )
+    return SETTINGS_STATE
+
+
+def select_lenguage(update: Update, context: CallbackContext):
+
+    buttons = [
+        [InlineKeyboardButton("🇺🇿 O'zbekcha", callback_data="uzb")],
+        [InlineKeyboardButton("🇷🇺 Русский", callback_data="rus")],
+    ]
+    markup = InlineKeyboardMarkup(buttons)
+    update.message.reply_text(
+        """Iltimos, tilni tanlang
+Пожалуйста, выберите язык ⬇️""",
+        reply_markup=markup
     )
 
 
@@ -103,29 +117,50 @@ Manzilni kiriting yoki "📍 Manzilini yuborish" tugmachasini bosing 👇🏻"""
     )
     return LOCATION_STATE
 
-# def location(update: Update, context: CallbackContext):
-#     update.message.reply_text(
-#         "",
-#         reply_markup=ReplyKeyboardMarkup(
-#             MENUS_KEYBOARD,
-#             one_time_keyboard=True,
-#             resize_keyboard=True,
-#         )
-#     )
-#     return LOCATION_STATE
-
 
 def menus(update: Update, context: CallbackContext):
+    menus = Menu.objects.all()
+    menu_keyboard = []
+    for i in range(0, len(menus), 2):
+        if i+1 != len(menus):
+            menu_keyboard.append([menus[i].title, menus[i+1].title])
+        else:
+            menu_keyboard.append([menus[i].title])
+    menu_keyboard.insert(0, BASKET)
+    menu_keyboard.append([MAIN_MENU_KEYBOARD])
+    reply_markup = ReplyKeyboardMarkup(menu_keyboard, resize_keyboard=True)
     update.message.reply_text(
         "Quyidagilardan birini tanlang 👇🏻",
-        reply_markup=ReplyKeyboardMarkup(
-
-            MENUS_KEYBOARD,
-            one_time_keyboard=False,
-            resize_keyboard=True,
-        )
+        reply_markup=reply_markup,
     )
-    # return LOCAT
+    return SUB_MENUS_STATE
+
+
+def sub_menus_by_category(update: Update, context: CallbackContext):
+    text = update.message.text
+    product = Menu.product.get(title=text)
+    menu_keyboard = []
+    for i in range(0, len(product), 2):
+        if i + 1 != len(product):
+            menu_keyboard.append([product[i].title, product[i + 1].title])
+        else:
+            menu_keyboard.append([product[i].title])
+    menu_keyboard.insert(0, BASKET)
+    menu_keyboard.append([MAIN_MENU_KEYBOARD])
+    reply_markup = ReplyKeyboardMarkup(menu_keyboard, resize_keyboard=True)
+    update.message.reply_text(
+        "Mahsulotni tanlang 👇🏻",
+        reply_markup=reply_markup,
+    )
+    return PRODUCT_STATE
+
+
+def product(update: Update, context: CallbackContext):
+    title = update.message.text
+    product = Product.objects.get(title=title)
+    update.message.reply_text(
+        product.price
+    )
 
 
 def basket(update: Update, context: CallbackContext):
