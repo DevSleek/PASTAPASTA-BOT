@@ -1,5 +1,7 @@
 MAIN_MENU_KEYBOARD = [["🏠 Bosh menu"]]
 
+BACK_TO = "⬅️ Ortga"
+
 MENU = "🍴 Menyu"
 BASKET = "📥 Savat"
 CAFE_LOCATION = "KAFE LOKATSIYASI"

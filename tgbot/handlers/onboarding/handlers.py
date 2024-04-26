@@ -2,19 +2,21 @@ import datetime
 
 from django.utils import timezone
 from telegram import ParseMode, Update
-from telegram.ext import CallbackContext
-from telegram import KeyboardButton, ReplyKeyboardMarkup,  InlineKeyboardMarkup, Update, InlineKeyboardButton
-from telegram.ext import (
-    ConversationHandler,
-    CallbackContext,
-)
+from telegram import KeyboardButton, ReplyKeyboardMarkup,  InlineKeyboardMarkup, \
+     InlineKeyboardButton
+from telegram.ext import ConversationHandler, CallbackContext
 
 from users.models import User
 from tgbot.handlers.onboarding import static_text
 from tgbot.handlers.utils.info import extract_user_data_from_update
-from tgbot.handlers.onboarding.keyboards import MAIN_MENU_KEYBOARD, MAIN_KEYBOARD, MARKS, SETTINGS_KEYBOARD, BASKET
-from tgbot.handlers.onboarding.states import FEEDBACK_STATE, MENUS_STATE, LOCATION_STATE, SETTINGS_STATE, SUB_MENUS_STATE
-from products.models import Menu, Product
+from tgbot.handlers.onboarding.keyboards import MAIN_MENU_KEYBOARD, MAIN_KEYBOARD, MARKS, \
+    SETTINGS_KEYBOARD, BASKET, BACK_TO
+from tgbot.handlers.onboarding.states import FEEDBACK_STATE, LOCATION_STATE, \
+    SETTINGS_STATE, SUB_MENUS_STATE, PRODUCT_STATE, ORDER_FINISHED
+from products.models import Category, Product, Card
+from tgbot.main import bot
+
+menu_keyboard = []
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -32,6 +34,7 @@ def start(update: Update, context: CallbackContext) -> None:
             resize_keyboard=True,
         ),
     )
+    return ConversationHandler.END
 
 
 def help(update: Update, context: CallbackContext):
@@ -105,7 +108,9 @@ def menu(update: Update, context: CallbackContext) -> int:
 
 *Ob havo va yo'l tirbandliklar sababli yetkazish narxi o'zgarishi mumkin""",
     )
-    keyboard = [[KeyboardButton("📍 Manzilini yuborish", request_location=True)]]
+    keyboard = [
+        [KeyboardButton("📍 Manzilini yuborish", request_location=True)]
+    ]
     update.message.reply_text(
         """Qaysi manzilga yetkazilsin?
 Manzilni kiriting yoki "📍 Manzilini yuborish" tugmachasini bosing 👇🏻""",
@@ -119,35 +124,34 @@ Manzilni kiriting yoki "📍 Manzilini yuborish" tugmachasini bosing 👇🏻"""
 
 
 def menus(update: Update, context: CallbackContext):
-    menus = Menu.objects.all()
-    menu_keyboard = []
+    menus = Category.objects.all()
     for i in range(0, len(menus), 2):
         if i+1 != len(menus):
             menu_keyboard.append([menus[i].title, menus[i+1].title])
         else:
             menu_keyboard.append([menus[i].title])
-    menu_keyboard.insert(0, BASKET)
-    menu_keyboard.append([MAIN_MENU_KEYBOARD])
+    menu_keyboard.insert(0, [BASKET])
+    menu_keyboard.append(MAIN_MENU_KEYBOARD[0])
     reply_markup = ReplyKeyboardMarkup(menu_keyboard, resize_keyboard=True)
-    update.message.reply_text(
-        "Quyidagilardan birini tanlang 👇🏻",
+    context.bot.send_message(
+        chat_id=update.message.chat.id,
+        text="Quyidagilardan birini tanlang 👇🏻",
         reply_markup=reply_markup,
     )
     return SUB_MENUS_STATE
 
 
 def sub_menus_by_category(update: Update, context: CallbackContext):
-    text = update.message.text
-    product = Menu.product.get(title=text)
-    menu_keyboard = []
+    title = update.message.text
+    product = Product.objects.filter(category__title=title)
+    sub_menu_keyboard = []
     for i in range(0, len(product), 2):
         if i + 1 != len(product):
-            menu_keyboard.append([product[i].title, product[i + 1].title])
+            sub_menu_keyboard.append([product[i].title, product[i + 1].title])
         else:
             menu_keyboard.append([product[i].title])
-    menu_keyboard.insert(0, BASKET)
-    menu_keyboard.append([MAIN_MENU_KEYBOARD])
-    reply_markup = ReplyKeyboardMarkup(menu_keyboard, resize_keyboard=True)
+    sub_menu_keyboard.append([BACK_TO, BASKET])
+    reply_markup = ReplyKeyboardMarkup(sub_menu_keyboard, resize_keyboard=True)
     update.message.reply_text(
         "Mahsulotni tanlang 👇🏻",
         reply_markup=reply_markup,
@@ -158,9 +162,42 @@ def sub_menus_by_category(update: Update, context: CallbackContext):
 def product(update: Update, context: CallbackContext):
     title = update.message.text
     product = Product.objects.get(title=title)
+    keyboard = []
+    for i in range(1, 11, 3):
+        if i != 10:
+            keyboard.append([str(i), str(i+1), str(i+2)])
+        else:
+            keyboard.append([str(i)])
+    keyboard.insert(0, [BACK_TO])
+    with open(str(product.photo), 'rb') as photo:
+        bot.sendPhoto(
+            chat_id=update.message.chat_id,
+            photo=photo,
+            caption=f'{product.title}\n\n{product.descreption}\n\nVazn: {product.weight} g\n\n Narxi: {product.price} so\'m'
+        )
     update.message.reply_text(
-        product.price
+        "Sonini tanlang ⬇️",
+        reply_markup=ReplyKeyboardMarkup(
+            keyboard,
+            resize_keyboard=True,
+        )
     )
+
+    return ORDER_FINISHED
+
+
+def order_finished(update: Update, context: CallbackContext):
+    quantity = int(update.message.text)
+    element = Card.objects.create()
+    update.message.reply_text(
+        "Ajoyib tanlov, biron narsa yana buyurtma qilamizmi?",
+        reply_markup=ReplyKeyboardMarkup(
+            menu_keyboard,
+            resize_keyboard=True
+        )
+    )
+
+    return ConversationHandler.END
 
 
 def basket(update: Update, context: CallbackContext):
@@ -197,7 +234,7 @@ def feedback(update: Update, context: CallbackContext):
 Agar Siz bizning xizmatlarimiz sifatini yaxhshilashga yordam bersangiz benihoyat hursand bo’lamiz.
 Buning uchun 5 ballik tizim asosida bizni baholang""",
         reply_markup=ReplyKeyboardMarkup(
-            MARKS + MAIN_MENU_KEYBOARD,
+            MARKS.append(MAIN_MENU_KEYBOARD),
             one_time_keyboard=False,
             input_field_placeholder="Quyidagilardan birini tanlang",
             resize_keyboard=True,

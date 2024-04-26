@@ -1,16 +1,23 @@
 from django.contrib import admin
-from .models import Menu, Product
+from .models import Category, Product, Card
 
 
-class MenuAdmin(admin.ModelAdmin):
+class CategoryAdmin(admin.ModelAdmin):
     list_display = ('title',)
 
 
-admin.site.register(Menu, MenuAdmin)
+admin.site.register(Category, CategoryAdmin)
 
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('title', 'photo', 'descreption', 'price', 'weight')
+    list_display = ('title', 'category', 'photo', 'descreption', 'price', 'weight')
 
 
 admin.site.register(Product, ProductAdmin)
+
+
+class CardAdmin(admin.ModelAdmin):
+    list_display = ('product', 'quantity')
+
+
+admin.site.register(Card, CardAdmin)
